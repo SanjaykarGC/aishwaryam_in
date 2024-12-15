@@ -1,0 +1,133 @@
+<?php
+  require('inc/essentials.php');
+  require('inc/db_config.php');
+  adminLogin();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - New Bookings</title>
+  <?php require('inc/links.php'); ?>
+</head>
+<body class="bg-light">
+
+  <?php require('inc/header.php'); ?>
+
+
+
+  <div class="container-fluid" id="content">
+    <div class="row">
+      <div class="col-lg-10 ms-auto p-4 overflow-hidden">
+        <h3 class="mb-4" style="float:left">ALL BOOKINGS</h3>
+       <!-- <div style="float:right;"><a href="pdf.php" class="btn btn-info" style="background:#DD2905;color: #FFF;border:none">Downlaod PDF</a></div>-->
+        <div style="clear:both"></div>
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+
+           
+            <div class="table-responsive">
+              <table class="table table-hover border" style="min-width: 1200px;">
+                <thead>
+                  <tr class="bg-dark text-light">
+                    <th scope="col">Order ID</th>
+                    <th scope="col">User Details</th>
+                    <th scope="col">Room Details</th>
+                    <th scope="col">Check In</th>
+                    <th scope="col">Check Out</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Total Amount & GST</th>
+                    <th scope="col">Net Amount</th>
+                    <th scope="col">Booked Date</th>
+                    <th scope="col">PDF</th>
+                    <th scope="col">Action</th>
+                    
+                  </tr>
+                </thead>
+                <tbody>      
+                    <?php 
+                          $i=1;
+                          $sql="select * from rooms as r INNER JOIN booking_order as b ON r.id=b.room_id 
+                          INNER JOIN user_cred as u ON b.user_id=u.id where b.booking_status='confirmed' ";
+                          $res = mysqli_query($con,$sql);
+                          while($row=mysqli_fetch_array($res)) {
+
+                    ?>   
+                    <tr>
+                        <td><span class="btn btn-primary"><?php echo $row['order_id'];?></span></td>
+                        <td><?php echo $row['uname'];?> <?php echo $row['email'];?> <br> <?php echo $row['phonenum'];?></td>
+                         <td><?php echo $row['name'];?></td>
+                         <td><?php echo $row['check_in'];?></td>
+                         <td><?php echo $row['check_out'];?></td>
+                        <td> <?php echo $row['price'];?> Rs</td>
+                        <td> <?php echo $row['trans_amt'];?> & <?php echo $row['gst'];?> Rs 18%</td>
+                        <td> <?php echo $row['final_amt'];?> Rs </td>
+                        <td> <?php echo $row['datentime'];?></td>
+                        <td><a href="generate_pdf.php?id=<?php echo $row['booking_id'];?>" target="_blank" class="badge badge-warning" style="background: orange;">Generate PDF</a></td>
+                        <td> <span class="badge badge-warning" style="background: green;">Booked</span></td>
+                    </tr>  
+                    <?php $i++; } ?>      
+                </tbody>
+              </table>
+            </div>
+ <?php 
+                          
+                          $sql="select SUM(final_amt) as total from rooms as r INNER JOIN booking_order as b ON r.id=b.room_id 
+                          INNER JOIN user_cred as u ON b.user_id=u.id where b.booking_status='confirmed' ";
+                          $res = mysqli_query($con,$sql);
+                          while($row=mysqli_fetch_array($res)) { ?>
+
+                            <div class="btn btn-success" style="text-align: right;float: right;">Total Amount: ₹ <?php echo $row['total']; ?></div>
+
+                            <?php 
+
+                          }
+
+                    ?>   
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Assign Room Number modal -->
+
+  <div class="modal fade" id="assign-room" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form id="assign_room_form">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Assign Room</h5>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Room Number</label>
+              <input type="text" name="room_no" class="form-control shadow-none" required>
+            </div>
+            <span class="badge rounded-pill bg-light text-dark mb-3 text-wrap lh-base">
+              Note: Assign Room Number only when user has been arrived!
+            </span>
+            <input type="hidden" name="booking_id">
+          </div>
+          <div class="modal-footer">
+            <button type="reset" class="btn text-secondary shadow-none" data-bs-dismiss="modal">CANCEL</button>
+            <button type="submit" class="btn custom-bg text-white shadow-none">ASSIGN</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+
+  <?php require('inc/scripts.php'); ?>
+
+  <script src="scripts/new_bookings.js"></script>
+
+</body>
+</html>
